@@ -14,3 +14,12 @@ node src/index.js {image_name.ext} {font_name.ext} {font_size} {font_color_hex} 
 - font_size -> integer font size, later used as px
 - font_color_hex -> "#000000" "#ffffff"
 - font_weight -> normal, bold, italic
+
+# Font naming
+Expects such a naming convention:
+- normal -> {fontName}
+- bold -> {fontName}-bold
+- italic -> {fontName}-italic
+
+# Example command
+node src/index.js test.jpg junegull.ttf 330 "#538720"
