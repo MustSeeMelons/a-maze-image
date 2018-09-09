@@ -17,6 +17,7 @@ node src/index.js {image_name.ext} {font_name.ext} {font_size} {font_color_hex} 
 
 # Font naming
 Expects such a naming convention:
+
 - normal -> {fontName}
 - bold -> {fontName}-bold
 - italic -> {fontName}-italic
