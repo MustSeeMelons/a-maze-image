@@ -1,0 +1,16 @@
+{
+  "name": "a-maze-image",
+  "version": "1.0.0",
+  "description": "Utility for A-Maze-Thing to create leaderboard images.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://MustSeeMelons@bitbucket.org/MustSeeMelons/a-maze-image.git"
+  },
+  "author": "strautins",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/MustSeeMelons/a-maze-image#readme",
+  "dependencies": {
+    "canvas": "^2.0.0-alpha.14"
+  },
+  "devDependencies": {}
+}
