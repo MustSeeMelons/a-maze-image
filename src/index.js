@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const Canvas = require("canvas");
-const Font = Canvas.Font;
 const Image = Canvas.Image;
 
 const IMG_SIZE = 512;
@@ -11,6 +10,10 @@ const FONT_INDEX = 3;
 const FONT_SIZE = 4;
 const FONT_COLOR = 5;
 const FONT_WEIGHT = 6;
+const X_OFF = 7;
+const Y_OFF = 8;
+const START_NUM = 9;
+const END_NUM = 10;
 
 const FILE_DIR = "./images/";
 const FONT_DIR = "./fonts/";
@@ -21,8 +24,19 @@ let fontName = process.argv[FONT_INDEX];
 let fontSize = process.argv[FONT_SIZE] || 150;
 let fontColor = process.argv[FONT_COLOR] || "#000000";
 let fontWeight = process.argv[FONT_WEIGHT] || "normal";
+let xOffset = process.argv[X_OFF] || (IMG_SIZE / 2);
+let yOffset = process.argv[Y_OFF] ||  (IMG_SIZE / 2) + (fontSize / 3);
+let startNum = process.argv[START_NUM] || 0;
+let endNum = process.argv[END_NUM] || 100;
 
 let fileExt;
+
+const NANO_TO_SEC = 1000000000;
+
+function info(info, spaced = true) {
+    const newLines = spaced ? "\n\n" : "";
+    console.log(`${newLines}${info.toUpperCase()}${newLines}`)
+}
 
 function fontFile(name) {
     return FONT_DIR + name;
@@ -54,38 +68,54 @@ function registerFont(nameOfFile, fontFamily, weight) {
         Canvas.registerFont(fontFile(nameOfFile), { family: fontFamily, weight: weight });
     } catch (err) {
         // Ignoring faults
+        console.log(err);
+        info("this is fine");
     }
 
 }
 
-function createAndSaveImage(number, fontFamily) {
-    const canvas = Canvas.createCanvas(IMG_SIZE, IMG_SIZE);
-    const ctx = canvas.getContext('2d');
+async function createAndSaveImage(number, fontFamily) {
+    return new Promise((resolve, reject) => {
+        let canvas = Canvas.createCanvas(IMG_SIZE, IMG_SIZE);
+        let ctx = canvas.getContext('2d');
 
-    const img = new Image()
-    img.src = fs.readFileSync(path.join(FILE_DIR, fileName));
-    ctx.drawImage(img, 0, 0, IMG_SIZE, IMG_SIZE);
+        const img = new Image()
+        img.src = fs.readFileSync(path.join(FILE_DIR, fileName));
+        ctx.drawImage(img, 0, 0, IMG_SIZE, IMG_SIZE);
 
-    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    ctx.fillStyle = fontColor;
-    ctx.textAlign = "center";
-    ctx.fillText(`${number}`, (IMG_SIZE / 2) - (0 / 2), (IMG_SIZE / 2) + (fontSize / 4));
+        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        ctx.fillStyle = fontColor;
+        ctx.textAlign = "center";
+        ctx.fillText(`${number}`, xOffset, yOffset);
 
-    canvas.createPNGStream().pipe(fs.createWriteStream(path.join(OUTPUT_DIR, `leaderboard_${number}` + fileExt)))
+        writeStream = fs.createWriteStream(path.join(OUTPUT_DIR, `leaderboard_${number}` + fileExt));
+        writeStream.on("close", () => {
+            resolve();
+        })
+        canvas.createPNGStream().pipe(writeStream);
+    });
+
 }
 
-if (!fileName || !fontName) {
-    console.log("Must provied file and font.");
-} else {
-    const startTime = process.hrtime();
+async function performJob() {
+    if (!fileName || !fontName) {
+        console.log("Must provied file and font.");
+    } else {
+        const startTime = process.hrtime();
 
-    const fontFamily = registerFonts();
-    fileExt = getExtension(fileName);
+        const fontFamily = registerFonts();
+        info("fonts registered");
 
-    for (let i = 0; i < 100; i++) {
-        createAndSaveImage(i + 1, fontFamily);
+        fileExt = getExtension(fileName);
+
+        for (let i = startNum; i < endNum; i++) {
+            await createAndSaveImage(i + 1, fontFamily);
+            info(`saved image no. ${i + 1}`, false);
+        }
+
+        const endTime = process.hrtime(startTime);
+        console.log("Done in: " + (endTime[0] + (endTime[1] / NANO_TO_SEC)) + " s");
     }
-
-    const endTime = process.hrtime(startTime);
-    console.log("Done in: " + (endTime[1]) / 1000000 + "ms");
 }
+
+performJob();

@@ -10,7 +10,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/MustSeeMelons/a-maze-image#readme",
   "dependencies": {
-    "canvas": "^2.0.0-alpha.14"
+    "canvas": "2.2.0"
   },
   "devDependencies": {}
 }
